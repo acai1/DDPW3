@@ -1,13 +1,5 @@
-#
-# This is the server logic of a Shiny web application. You can run the
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
 library(shiny)
-library(datasets)
+library(plotly)
 
 mpgData <- mtcars
 mpgData$am <- factor(mpgData$am, labels = c("Automatic", "Manual"))
@@ -15,36 +7,15 @@ mpgData$am <- factor(mpgData$am, labels = c("Automatic", "Manual"))
 shinyServer(function(input, output) {
   
   formulaText <- reactive({
-    paste("mpg ~", input$variable)
-  })
-  
-  formulaTextPoint <- reactive({
-    paste("mpg ~", "as.integer(", input$variable, ")")
-  })
-  
-  fit <- reactive({
-    lm(as.formula(formulaTextPoint()), data=mpgData)
+    paste("mpg vs ", input$variable)
   })
   
   output$caption <- renderText({
     formulaText()
   })
   
-  output$mpgBoxPlot <- renderPlot({
-    boxplot(as.formula(formulaText()), 
-            data = mpgData,
-            outline = input$outliers)
-  })
-  
-  output$fit <- renderPrint({
-    summary(fit())
-  })
-  
   output$mpgPlot <- renderPlot({
-    with(mpgData, {
-      plot(as.formula(formulaTextPoint()))
-      abline(fit(), col=2)
-    })
+    ggplot(mpgData, aes_string(y=input$variable, x="mpg")) + geom_point()
   })
   
 })
